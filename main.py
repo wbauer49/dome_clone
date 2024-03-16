@@ -6,6 +6,7 @@ import constants
 import controller
 import grid
 import rendering
+import players
 import env
 
 
@@ -13,6 +14,7 @@ try:
     env.controller = controller.Controller()
     env.renderer = rendering.Renderer()
     env.grid = grid.Grid()
+    env.players = [players.Player(1)]
 
     running = True
     while running:
