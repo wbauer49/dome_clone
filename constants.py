@@ -1,12 +1,18 @@
 
 WIDTH = 1900
 HEIGHT = 1000
-PIX = 60
+PIX = 80
 FRAME_RATE = 60
 
 STEP_TIME = 0.05
-SPACE_PRESSED_TIME = 0.5
 
 
 class COLORS:
     BACKGROUND = (0, 0, 0)
+    PIECE = (200, 200, 30)
+
+
+R = 0
+U = 1
+L = 2
+D = 3
