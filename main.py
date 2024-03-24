@@ -4,7 +4,7 @@ import time
 
 import constants
 import controller
-import grid
+import layout
 import rendering
 import players
 import env
@@ -13,8 +13,9 @@ import env
 try:
     env.controller = controller.Controller()
     env.renderer = rendering.Renderer()
-    env.grid = grid.Grid()
     env.players = [players.Player(1)]
+    env.grid = layout.Grid()
+    env.hand = layout.Hand()
 
     running = True
     while running:

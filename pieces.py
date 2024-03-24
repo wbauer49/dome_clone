@@ -126,3 +126,9 @@ class Piece:
 
     def unique_function(self):
         pass
+
+
+class Starter(Piece):
+    blocks = {
+        (0, 0): Block(inputs=[], outputs=[R])
+    }
