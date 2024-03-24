@@ -21,27 +21,37 @@ class Grid:
     def reset_grid(self):
         self.surface = pygame.surface.Surface((self.size * PIX, self.size * PIX))
         self.matrix = []
-        for y in range(self.size + 1):
+        for row in range(self.size + 1):
             self.matrix.append([])
-            for x in range(self.size + 1):
-                self.matrix[y].append(None)
-        self.set_grid_block((0, 0), pieces.Starter())
+            for col in range(self.size + 1):
+                self.matrix[row].append(None)
+
+        starter_piece = pieces.StarterPiece()
+        mid = self.size // 2
+        self.matrix[mid][mid] = starter_piece
+        for (b_x, b_y), block in starter_piece.blocks.items():
+            self.matrix[mid + b_x][mid + b_y] = block
+        self.surface.blit(starter_piece.surface, (mid * PIX, mid * PIX))
 
         self.render()
 
     def render(self):
         for i in range(1, self.size):
-            pygame.draw.line(self.surface, (255, 255, 255), (i * PIX, 0), (i * PIX, self.size * PIX))
-            pygame.draw.line(self.surface, (255, 255, 255), (0, i * PIX), (self.size * PIX, i * PIX))
+            pygame.draw.line(self.surface, COLORS.GRID_LINE, (i * PIX, 0), (i * PIX, self.size * PIX))
+            pygame.draw.line(self.surface, COLORS.GRID_LINE, (0, i * PIX), (self.size * PIX, i * PIX))
 
-    def coords_in_range(self, coords):
-        return 0 <= coords[0] < self.size and 0 <= coords[1] < self.size
+    def play_clicked_piece(self, x, y, drag_piece):
+        col = (x - self.location[0]) // PIX
+        row = (y - self.location[1]) // PIX
 
-    def get_grid_block(self, coords):
-        return self.matrix[coords[1] + self.size // 2][coords[0] + self.size // 2]
+        if 0 <= col < self.size and 0 <= row < self.size:
+            for (b_x, b_y), block in drag_piece.blocks.items():
+                self.matrix[col + b_x][row + b_y] = block
 
-    def set_grid_block(self, coords, block):
-        self.matrix[coords[1] + self.size // 2][coords[0] + self.size // 2] = block
+            self.surface.blit(drag_piece.surface, (col * PIX, row * PIX))
+            return True
+
+        return False
 
 
 class Hand:
@@ -61,7 +71,7 @@ class Hand:
         self.render()
 
     def render(self):
-        self.surface = pygame.surface.Surface((self.card_width * 4, self.card_height * 3))
+        self.surface = pygame.surface.Surface((self.card_width * 4, self.card_height * 2))
         for i, piece in enumerate(self.cards):
             x = self.card_width * (i % 4) + self.card_margin
             y = self.card_height * (i // 4) + self.card_margin
@@ -84,3 +94,16 @@ class Hand:
 
     def draw_card(self):
         self.cards.append(self.deck.pop())
+
+    def get_clicked_piece(self, x, y):
+        x -= self.location[0]
+        y -= self.location[1]
+        if (
+                0 < x < self.card_width * 4 and 0 < y < self.card_height * 2 and
+                self.card_margin < x % self.card_width < self.card_width - self.card_margin and
+                self.card_margin < y % self.card_height < self.card_height - self.card_margin
+        ):
+            i = 4 * (y // self.card_height) + x // self.card_width
+            if i < len(self.cards):
+                return self.cards[i]
+        return None

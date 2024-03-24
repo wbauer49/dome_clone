@@ -8,8 +8,8 @@ STARTING_DECK = [
         (0, 0): pieces.Block(inputs=[L], outputs=[R])
     }),
     pieces.Piece({
-        (0, 0): pieces.Block(inputs=[], outputs=[]),
-        (0, 1): pieces.Block(inputs=[], outputs=[]),
+        (0, 0): pieces.Block(inputs=[], outputs=[R, U, L]),
+        (0, 1): pieces.Block(inputs=[], outputs=[R, L, D]),
     }),
     pieces.Piece({
         (0, 0): pieces.Block(inputs=[L], outputs=[]),

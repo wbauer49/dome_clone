@@ -4,7 +4,7 @@ import pygame
 from constants import *
 
 
-MAIN_MARGIN = 10
+MAIN_MARGIN = 8
 CONNECTOR_MARGIN = 14
 INPUT_PIX = 18
 
@@ -31,6 +31,7 @@ class Piece:
     blocks = {
         (0, 0): Block(inputs=[], outputs=[])
     }
+    color = COLORS.PIECE
 
     def __init__(self, blocks=None):
         if blocks is not None:
@@ -58,7 +59,7 @@ class Piece:
                                      (rect_x * PIX + CONNECTOR_MARGIN, rect_y * PIX + CONNECTOR_MARGIN,
                                       PIX - 2 * CONNECTOR_MARGIN, PIX - 2 * CONNECTOR_MARGIN))
 
-            pygame.draw.rect(self.surface, COLORS.PIECE,
+            pygame.draw.rect(self.surface, self.color,
                              ((x - self.min_x) * PIX + MAIN_MARGIN, (y - self.min_y) * PIX + MAIN_MARGIN,
                               PIX - 2 * MAIN_MARGIN, PIX - 2 * MAIN_MARGIN))
 
@@ -112,15 +113,15 @@ class Piece:
         self.max_x = 0
         self.min_y = 0
         self.max_y = 0
-        for coord in self.blocks:
-            if coord[0] < self.min_x:
-                self.min_x = coord[0]
-            if coord[0] > self.max_x:
-                self.max_x = coord[0]
-            if coord[1] < self.min_y:
-                self.min_y = coord[1]
-            if coord[1] > self.max_y:
-                self.max_y = coord[1]
+        for coords in self.blocks:
+            if coords[0] < self.min_x:
+                self.min_x = coords[0]
+            if coords[0] > self.max_x:
+                self.max_x = coords[0]
+            if coords[1] < self.min_y:
+                self.min_y = coords[1]
+            if coords[1] > self.max_y:
+                self.max_y = coords[1]
 
         self.scale = max(self.max_x - self.min_x, self.max_y - self.min_y) + 1
 
@@ -128,7 +129,8 @@ class Piece:
         pass
 
 
-class Starter(Piece):
+class StarterPiece(Piece):
     blocks = {
         (0, 0): Block(inputs=[], outputs=[R])
     }
+    color = (100, 100, 100)

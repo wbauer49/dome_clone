@@ -9,7 +9,7 @@ import env
 
 class Controller:
 
-    drag_block = None
+    drag_piece = None
     drag_pos = None
     start_coords = None
     last_step_time = 0
@@ -27,37 +27,22 @@ class Controller:
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # left click
-                self.start_coords = (event.pos[0] // PIX, event.pos[1] // PIX)
-                if env.grid.coords_in_range(self.start_coords):
-                    block = env.grid.get_grid_block(self.start_coords)
-                    if block is not None and not block.is_wall:
-                        self.drag_block = block
-                        self.drag_pos = (event.pos[0] - PIX // 2, event.pos[1] - PIX // 2)
+                clicked_piece = env.hand.get_clicked_piece(event.pos[0], event.pos[1])
+                if clicked_piece:
+                    self.drag_piece = clicked_piece
 
-            else:  # right click
-                if self.drag_block is not None:
-                    self.drag_block.rotate()
-                else:
-                    coords = (event.pos[0] // PIX, event.pos[1] // PIX)
-                    if env.grid.coords_in_range(coords):
-                        block = env.grid.get_grid_block(coords)
-                        block.rotate()
+                if self.drag_piece:
+                    self.drag_pos = (event.pos[0] - PIX // 2, event.pos[1] - PIX // 2)
+                    if env.grid.play_clicked_piece(event.pos[0], event.pos[1], self.drag_piece):
+                        self.drag_piece = None
+
+            elif event.button == 3:  # right click
+                if self.drag_piece:
+                    self.drag_piece.rotate()
 
         elif event.type == pygame.MOUSEMOTION:
-            if self.drag_block is not None:
+            if self.drag_piece:
                 self.drag_pos = (event.pos[0] - PIX // 2, event.pos[1] - PIX // 2)
-
-        elif event.type == pygame.MOUSEBUTTONUP:  # snap back to grid
-            if self.drag_block is not None:
-                if event.button == 1:
-                    end_coords = (event.pos[0] // PIX, event.pos[1] // PIX)
-                    if env.grid.coords_in_workspace(end_coords):
-                        end_block = env.grid.get_grid_block(end_coords)
-                        if end_block is None:  # if empty, drop the block here
-                            env.grid.set_grid_block(end_coords, self.drag_block)
-                            env.grid.set_grid_block(self.start_coords, None)
-
-                self.drag_block = None
 
     def check_pressed_keys(self):
         pressed_keys = pygame.key.get_pressed()
