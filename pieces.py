@@ -15,6 +15,12 @@ class Block:
         self.inputs = inputs
         self.outputs = outputs
 
+    def rotate(self):
+        for i, in_dir in enumerate(self.inputs):
+            self.inputs[i] = (in_dir - 1) % 4
+        for i, out_dir in enumerate(self.outputs):
+            self.outputs[i] = (out_dir - 1) % 4
+
 
 class Piece:
 
@@ -43,22 +49,24 @@ class Piece:
         self.get_scale()
         self.surface = pygame.surface.Surface(((self.max_x - self.min_x + 1) * PIX, (self.max_y - self.min_y + 1) * PIX))
         self.surface.set_colorkey((0, 0, 0))
-        for (x, y), block in self.blocks.items():
-            for (x2, y2), block2 in self.blocks.items():
+
+        for (x1, y1) in self.blocks:
+            for (x2, y2) in self.blocks:
                 rect_x = None
                 rect_y = None
-                if (x + 1, y) == (x2, y2):
-                    rect_x = x - self.min_x + 0.5
-                    rect_y = y - self.min_y
-                elif (x, y + 1) == (x2, y2):
-                    rect_x = x - self.min_x
-                    rect_y = y - self.min_y + 0.5
+                if (x1 + 1, y1) == (x2, y2):
+                    rect_x = x1 - self.min_x + 0.5
+                    rect_y = y1 - self.min_y
+                elif (x1, y1 + 1) == (x2, y2):
+                    rect_x = x1 - self.min_x
+                    rect_y = y1 - self.min_y + 0.5
 
                 if rect_x is not None:
                     pygame.draw.rect(self.surface, COLORS.CONNECTOR,
                                      (rect_x * PIX + CONNECTOR_MARGIN, rect_y * PIX + CONNECTOR_MARGIN,
                                       PIX - 2 * CONNECTOR_MARGIN, PIX - 2 * CONNECTOR_MARGIN))
 
+        for (x, y), block in self.blocks.items():
             pygame.draw.rect(self.surface, self.color,
                              ((x - self.min_x) * PIX + MAIN_MARGIN, (y - self.min_y) * PIX + MAIN_MARGIN,
                               PIX - 2 * MAIN_MARGIN, PIX - 2 * MAIN_MARGIN))
@@ -85,8 +93,7 @@ class Piece:
 
                 for offset in [offset1, offset2]:
                     pygame.draw.rect(self.surface, COLORS.INPUT,
-                                     ((x - self.min_x) * PIX + offset[0], (y - self.min_x) * PIX + offset[1],
-                                      shape[0], shape[1]))
+                                     ((x - self.min_x) * PIX + offset[0], (y - self.min_y) * PIX + offset[1], shape[0], shape[1]))
 
             for out_dir in block.outputs:
                 if out_dir == R:
@@ -105,8 +112,16 @@ class Piece:
                     raise Exception("illegal output direction")
 
                 pygame.draw.rect(self.surface, COLORS.OUTPUT,
-                                 ((x - self.min_x) * PIX + offset[0], (y - self.min_x) * PIX + offset[1],
-                                  shape[0], shape[1]))
+                                 ((x - self.min_x) * PIX + offset[0], (y - self.min_y) * PIX + offset[1], shape[0], shape[1]))
+
+    def rotate(self):
+        new_blocks = {}
+        for (x, y), block in self.blocks.items():
+            block.rotate()
+            new_blocks[(-y, x)] = block
+
+        self.blocks = new_blocks
+        self.render()
 
     def get_scale(self):
         self.min_x = 0

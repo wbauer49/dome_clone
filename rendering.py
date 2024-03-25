@@ -10,9 +10,12 @@ class Renderer:
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.screen.fill(COLORS.BACKGROUND)
         pygame.display.flip()
 
     def render(self):
+        self.screen.fill(COLORS.BACKGROUND)
+
         self.screen.blit(env.grid.surface, env.grid.location)
         self.screen.blit(env.hand.surface, env.hand.location)
 

@@ -44,7 +44,33 @@ class Grid:
         col = (x - self.location[0]) // PIX
         row = (y - self.location[1]) // PIX
 
-        if 0 <= col < self.size and 0 <= row < self.size:
+        connected = False
+        for (b_x, b_y), block in drag_piece.blocks.items():
+            if not (0 <= col + b_x < self.size and 0 <= row + b_y < self.size) or self.matrix[col + b_x][row + b_y]:
+                return False
+            print("a")
+
+            for in_dir in block.inputs:
+                if (
+                        (
+                                in_dir == R and col + b_x + 1 < self.size and self.matrix[col + b_x + 1][row + b_y]
+                                and L in self.matrix[col + b_x + 1][row + b_y].outputs
+                        ) or (
+                                in_dir == U and row + b_y - 1 >= 0 and self.matrix[col + b_x][row + b_y - 1]
+                                and D in self.matrix[col + b_x][row + b_y - 1].outputs
+                        ) or (
+                                in_dir == L# and col + b_x - 1 >= 0 and self.matrix[col + b_x - 1][row + b_y]
+                                #and R in self.matrix[col + b_x - 1][row + b_y].outputs
+                        ) or (
+                                in_dir == D and row + b_y + 1 < self.size and self.matrix[col + b_x][row + b_y + 1]
+                                and U in self.matrix[col + b_x][row + b_y + 1].outputs
+                        )
+                ):
+                    connected = True
+                    print("b")
+
+        print("c")
+        if connected:
             for (b_x, b_y), block in drag_piece.blocks.items():
                 self.matrix[col + b_x][row + b_y] = block
 
@@ -55,11 +81,12 @@ class Grid:
 
 
 class Hand:
+
     card_width = 220
     card_height = 340
     card_margin = 15
-
     location = (WIDTH - card_width * 4, 0)
+
     hand_size = 4
 
     surface = None
@@ -68,14 +95,13 @@ class Hand:
 
     def __init__(self):
         self.start_turn(env.players[0])
-        self.render()
 
     def render(self):
         self.surface = pygame.surface.Surface((self.card_width * 4, self.card_height * 2))
         for i, piece in enumerate(self.cards):
             x = self.card_width * (i % 4) + self.card_margin
             y = self.card_height * (i // 4) + self.card_margin
-            pygame.draw.rect(self.surface, (30, 30, 30),
+            pygame.draw.rect(self.surface, COLORS.CARD,
                              (x, y, self.card_width - 2 * self.card_margin, self.card_height - 2 * self.card_margin))
 
             scale = 1.4 / piece.scale ** 0.5
@@ -91,6 +117,8 @@ class Hand:
         self.cards = []
         for i in range(self.hand_size):
             self.draw_card()
+
+        self.render()
 
     def draw_card(self):
         self.cards.append(self.deck.pop())

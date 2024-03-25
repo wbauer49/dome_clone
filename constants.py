@@ -4,16 +4,15 @@ HEIGHT = 1000
 PIX = 75
 FRAME_RATE = 60
 
-STEP_TIME = 0.05
-
 
 class COLORS:
-    BACKGROUND = (0, 0, 0)
+    BACKGROUND = (0, 0, 50)
     GRID_LINE = (50, 50, 50)
     PIECE = (200, 200, 30)
     CONNECTOR = (190, 190, 40)
     INPUT = (200, 100, 100)
     OUTPUT = (100, 200, 100)
+    CARD = (30, 30, 30)
 
 
 R = 0
