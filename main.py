@@ -11,6 +11,8 @@ import env
 
 
 try:
+    pygame
+
     env.controller = controller.Controller()
     env.renderer = rendering.Renderer()
     env.players = [players.Player(1)]

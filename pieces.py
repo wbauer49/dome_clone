@@ -33,7 +33,6 @@ class Piece:
     scale = None
     surface = None
 
-    actions = 1
     blocks = {
         (0, 0): Block(inputs=[], outputs=[])
     }
@@ -139,9 +138,6 @@ class Piece:
                 self.max_y = coords[1]
 
         self.scale = max(self.max_x - self.min_x, self.max_y - self.min_y) + 1
-
-    def unique_function(self):
-        pass
 
 
 class StarterPiece(Piece):

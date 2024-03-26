@@ -28,14 +28,16 @@ class Controller:
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # left click
-                clicked_piece = env.hand.get_clicked_piece(event.pos[0], event.pos[1])
-                if clicked_piece:
-                    self.drag_piece = clicked_piece
+                clicked_card = env.hand.get_clicked_card(event)
+                if clicked_card:
+                    self.drag_piece = clicked_card.piece
                     if self.drag_piece:
                         self.set_drag_pos(event)
 
-                if env.grid.play_clicked_piece(event.pos[0], event.pos[1], self.drag_piece):
-                    self.drag_piece = None
+                if self.drag_piece:
+                    if env.grid.play_clicked_piece(event, self.drag_piece):
+                        self.drag_piece = None
+                        env.hand.play_selected_card()
 
             elif event.button == 3:  # right click
                 if self.drag_piece:

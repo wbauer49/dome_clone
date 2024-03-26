@@ -13,6 +13,7 @@ class COLORS:
     INPUT = (200, 100, 100)
     OUTPUT = (100, 200, 100)
     CARD = (30, 30, 30)
+    CARD_TEXT = (150, 150, 150)
 
 
 R = 0

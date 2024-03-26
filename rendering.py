@@ -9,6 +9,7 @@ class Renderer:
 
     def __init__(self):
         pygame.init()
+        pygame.font.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.screen.fill(COLORS.BACKGROUND)
         pygame.display.flip()
