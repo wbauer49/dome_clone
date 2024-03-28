@@ -1,6 +1,7 @@
 
+players = None
 controller = None
 renderer = None
 grid = None
 hand = None
-players = None
+store = None

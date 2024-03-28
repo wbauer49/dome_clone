@@ -19,6 +19,7 @@ class Renderer:
 
         self.screen.blit(env.grid.surface, env.grid.location)
         self.screen.blit(env.hand.surface, env.hand.location)
+        self.screen.blit(env.store.surface, env.store.location)
 
         if env.controller.drag_piece is not None:
             self.screen.blit(env.controller.drag_piece.surface, env.controller.drag_pos)

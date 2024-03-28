@@ -1,5 +1,6 @@
 import copy
 
+import items
 import pygame
 import random
 
@@ -8,16 +9,57 @@ from constants import *
 import pieces
 
 
+BONUS_LOCATIONS = {
+    "b+1": [(4, 0), (2, 2)],
+    "b+2": [(4, 2)],
+    "b*2": [(6, 1), (5, 3)],
+    "b*3": [(6, 6)],
+    "g+1": [(1, 1), (4, 4), (7, 3)],
+    "g*2": [(5, 5)],
+}
+
+
+class Bonus:
+
+    def __init__(self, bonus_def):
+        self.currency, self.operation, value_str = list(bonus_def)
+        self.value = int(value_str)
+
+    def render(self):
+        surface = pygame.surface.Surface((PIX, PIX))
+
+        if self.currency == "b":
+            color = (20, 50, 100),
+        else:
+            color = (20, 100, 50)
+        pygame.draw.rect(surface, color, (0, 0, PIX, PIX))
+
+        font = pygame.font.SysFont(pygame.font.get_default_font(), 60)
+        text_surface = font.render(f"{self.operation}{self.value}", False, COLORS.BACKGROUND)
+        surface.blit(text_surface, ((PIX - text_surface.get_width()) // 2, (PIX - text_surface.get_height()) // 2))
+
+        return surface
+
+
 class Grid:
 
-    size = 13
     location = (0, 0)
+    size = 13
 
     matrix = None
+    bonuses = None
     surface = None
 
     def __init__(self):
+        self.construct_bonuses()
         self.reset_grid()
+
+    def construct_bonuses(self):
+        self.bonuses = {}
+        for bonus_def, locations in BONUS_LOCATIONS.items():
+            for (a, b) in locations:
+                for (a_offset, b_offset) in [(a, b), (-a, b), (-a, -b), (a, -b), (b, a), (-b, a), (-b, -a), (b, -a)]:
+                    self.bonuses[(self.size // 2 + a_offset), self.size // 2 + b_offset] = Bonus(bonus_def)
 
     def reset_grid(self):
         self.surface = pygame.surface.Surface((self.size * PIX, self.size * PIX))
@@ -37,6 +79,10 @@ class Grid:
         self.render()
 
     def render(self):
+        for (a, b), bonus in self.bonuses.items():
+            bonus_surface = bonus.render()
+            self.surface.blit(bonus_surface, (a * PIX, b * PIX))
+
         for i in range(1, self.size):
             pygame.draw.line(self.surface, COLORS.GRID_LINE, (i * PIX, 0), (i * PIX, self.size * PIX))
             pygame.draw.line(self.surface, COLORS.GRID_LINE, (0, i * PIX), (self.size * PIX, i * PIX))
@@ -109,7 +155,7 @@ class Hand:
     selected_card = None
 
     def __init__(self):
-        self.start_turn(env.players[0])
+        self.start_turn()
 
     def render(self):
         self.surface = pygame.surface.Surface((self.card_width * 4, self.card_height * 2))
@@ -131,8 +177,8 @@ class Hand:
             self.surface.blit(scaled_piece,
                               (x + piece_margin, y + self.card_height - 2 * self.card_margin - piece.scale * scale * PIX - piece_margin))
 
-    def start_turn(self, player):
-        self.deck = player.deck.copy()
+    def start_turn(self):
+        self.deck = env.players.copy_current_deck()
         random.shuffle(self.deck)
 
         self.cards = []
@@ -160,9 +206,40 @@ class Hand:
         return None
 
     def play_selected_card(self):
-
         card = self.cards.pop(self.selected_card)
         card.use_abilities()
 
         self.selected_card = None
         self.render()
+
+
+class Store:
+
+    item_size = 120
+    item_margin = 10
+    location = (WIDTH - item_size * 6, HEIGHT - item_size * 3)
+    surface = None
+
+    def __init__(self):
+        self.render()
+
+    def render(self):
+        self.surface = pygame.surface.Surface((self.item_size * 6, self.item_size * 3))
+        for i, item in enumerate(items.STARTING_ITEMS):
+            x = self.item_size * (i % 6) + self.item_margin
+            y = self.item_size * (i // 6) + self.item_margin
+            pygame.draw.rect(self.surface, COLORS.CARD,
+                             (x, y, self.item_size - 2 * self.item_margin, self.item_size - 2 * self.item_margin))
+
+    def get_clicked_item(self, event):
+        x = event.pos[0] - self.location[0]
+        y = event.pos[1] - self.location[1]
+        if (
+                0 < x < self.item_size * 6 and 0 < y < self.item_size * 3 and
+                self.item_margin < x % self.item_size < self.item_size - self.item_margin and
+                self.item_margin < y % self.item_size < self.item_size - self.item_margin
+        ):
+            i = 6 * (y // self.item_size) + x // self.item_size
+            if i < len(items.STARTING_ITEMS):
+                return items.STARTING_ITEMS[i]
+        return None

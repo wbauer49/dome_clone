@@ -11,13 +11,12 @@ import env
 
 
 try:
-    pygame
-
+    env.players = players.Players(1)
     env.controller = controller.Controller()
     env.renderer = rendering.Renderer()
-    env.players = [players.Player(1)]
     env.grid = layout.Grid()
     env.hand = layout.Hand()
+    env.store = layout.Store()
 
     running = True
     while running:
