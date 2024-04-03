@@ -9,16 +9,6 @@ from constants import *
 import pieces
 
 
-BONUS_LOCATIONS = {
-    "b+1": [(4, 0), (2, 2)],
-    "b+2": [(4, 2)],
-    "b*2": [(6, 1), (5, 3)],
-    "b*3": [(6, 6)],
-    "g+1": [(1, 1), (4, 4), (7, 3)],
-    "g*2": [(5, 5)],
-}
-
-
 class Bonus:
 
     def __init__(self, bonus_def):
@@ -50,13 +40,22 @@ class Grid:
     bonuses = None
     surface = None
 
+    BONUS_LOCATIONS = {
+        "b+1": [(4, 0), (2, 2)],
+        "b+2": [(4, 2)],
+        "b*2": [(6, 1), (5, 3)],
+        "b*3": [(6, 6)],
+        "g+1": [(1, 1), (4, 4), (7, 3)],
+        "g*2": [(5, 5)],
+    }
+
     def __init__(self):
         self.construct_bonuses()
         self.reset_grid()
 
     def construct_bonuses(self):
         self.bonuses = {}
-        for bonus_def, locations in BONUS_LOCATIONS.items():
+        for bonus_def, locations in self.BONUS_LOCATIONS.items():
             for (a, b) in locations:
                 for (a_offset, b_offset) in [(a, b), (-a, b), (-a, -b), (a, -b), (b, a), (-b, a), (-b, -a), (b, -a)]:
                     self.bonuses[(self.size // 2 + a_offset), self.size // 2 + b_offset] = Bonus(bonus_def)
@@ -215,31 +214,45 @@ class Hand:
 
 class Store:
 
-    item_size = 120
+    item_width = 450
+    item_height = 60
     item_margin = 10
-    location = (WIDTH - item_size * 6, HEIGHT - item_size * 3)
+    text_margin = 10
+    cost_width = 30
+    num_cols = 2
+    num_rows = 5
+    location = (WIDTH - item_width * num_cols, HEIGHT - item_height * num_rows)
     surface = None
 
     def __init__(self):
         self.render()
 
     def render(self):
-        self.surface = pygame.surface.Surface((self.item_size * 6, self.item_size * 3))
+        self.surface = pygame.surface.Surface((self.item_width * self.num_cols, self.item_height * self.num_rows))
+
+        font = pygame.font.SysFont(pygame.font.get_default_font(), 30)
+
         for i, item in enumerate(items.STARTING_ITEMS):
-            x = self.item_size * (i % 6) + self.item_margin
-            y = self.item_size * (i // 6) + self.item_margin
+            x = self.item_width * (i % self.num_cols) + self.item_margin
+            y = self.item_height * (i // self.num_cols) + self.item_margin
             pygame.draw.rect(self.surface, COLORS.CARD,
-                             (x, y, self.item_size - 2 * self.item_margin, self.item_size - 2 * self.item_margin))
+                             (x, y, self.item_width - 2 * self.item_margin, self.item_height - 2 * self.item_margin))
+
+            self.surface.blit(font.render(item.text, False, COLORS.CARD_TEXT), (x + self.text_margin, y + self.text_margin))
+            self.surface.blit(font.render(str(item.b_cost), False, COLORS.BLUE_COST),
+                              (x + self.item_width - 2 * self.item_margin - 2 * self.cost_width, y + self.text_margin))
+            self.surface.blit(font.render(str(item.g_cost), False, COLORS.GREEN_COST),
+                              (x + self.item_width - 2 * self.item_margin - self.cost_width, y + self.text_margin))
 
     def get_clicked_item(self, event):
         x = event.pos[0] - self.location[0]
         y = event.pos[1] - self.location[1]
         if (
-                0 < x < self.item_size * 6 and 0 < y < self.item_size * 3 and
-                self.item_margin < x % self.item_size < self.item_size - self.item_margin and
-                self.item_margin < y % self.item_size < self.item_size - self.item_margin
+                0 < x < self.item_width * self.num_cols and 0 < y < self.item_height * self.num_rows and
+                self.item_margin < x % self.item_width < self.item_width - self.item_margin and
+                self.item_margin < y % self.item_height < self.item_height - self.item_margin
         ):
-            i = 6 * (y // self.item_size) + x // self.item_size
+            i = self.num_cols * (y // self.item_height) + x // self.item_width
             if i < len(items.STARTING_ITEMS):
                 return items.STARTING_ITEMS[i]
         return None
