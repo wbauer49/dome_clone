@@ -1,4 +1,5 @@
 
+import copy
 import pygame
 
 from constants import *
@@ -138,6 +139,19 @@ class Piece:
                 self.max_y = coords[1]
 
         self.scale = max(self.max_x - self.min_x, self.max_y - self.min_y) + 1
+
+    def __deepcopy__(self, memo):
+        self.surface = None
+
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, copy.deepcopy(v, memo))
+
+        self.render()
+        result.render()
+        return result
 
 
 class StarterPiece(Piece):

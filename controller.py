@@ -1,8 +1,6 @@
 
 import pygame
-import time
 
-import constants
 from constants import *
 import env
 
@@ -13,6 +11,8 @@ class Controller:
     drag_pos = None
     start_coords = None
     space_pressed_time = 0
+
+    activated_item = None
 
     def set_drag_pos(self, event):
         if self.drag_piece:
@@ -28,16 +28,28 @@ class Controller:
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # left click
-                clicked_card = env.hand.get_clicked_card(event)
-                if clicked_card:
-                    self.drag_piece = clicked_card.piece
-                    if self.drag_piece:
-                        self.set_drag_pos(event)
 
                 if self.drag_piece:
                     if env.grid.play_clicked_piece(event, self.drag_piece):
                         self.drag_piece = None
                         env.hand.play_selected_card()
+                else:
+                    clicked_card = env.hand.get_clicked_card(event)
+                    if clicked_card:
+                        if self.activated_item:
+                            self.activated_item.unique_function(clicked_card)
+                            env.store.render()
+                            env.hand.render()
+                            self.activated_item = None
+
+                        else:
+                            self.drag_piece = clicked_card.piece
+                            if self.drag_piece:
+                                self.set_drag_pos(event)
+
+                    clicked_item = env.store.get_clicked_item(event)
+                    if clicked_item:
+                        self.activated_item = clicked_item
 
             elif event.button == 3:  # right click
                 if self.drag_piece:

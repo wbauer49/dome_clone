@@ -177,7 +177,7 @@ class Hand:
                               (x + piece_margin, y + self.card_height - 2 * self.card_margin - piece.scale * scale * PIX - piece_margin))
 
     def start_turn(self):
-        self.deck = env.players.copy_current_deck()
+        self.deck = env.players.get_curr_deck().copy()
         random.shuffle(self.deck)
 
         self.cards = []
@@ -227,6 +227,9 @@ class Store:
     def __init__(self):
         self.render()
 
+        self.highlight_surface = pygame.surface.Surface((self.item_width, self.item_height)).convert_alpha()
+        self.highlight_surface.fill((250, 250, 100, 50))
+
     def render(self):
         self.surface = pygame.surface.Surface((self.item_width * self.num_cols, self.item_height * self.num_rows))
 
@@ -245,14 +248,20 @@ class Store:
                               (x + self.item_width - 2 * self.item_margin - self.cost_width, y + self.text_margin))
 
     def get_clicked_item(self, event):
-        x = event.pos[0] - self.location[0]
-        y = event.pos[1] - self.location[1]
+        click_x = event.pos[0] - self.location[0]
+        click_y = event.pos[1] - self.location[1]
         if (
-                0 < x < self.item_width * self.num_cols and 0 < y < self.item_height * self.num_rows and
-                self.item_margin < x % self.item_width < self.item_width - self.item_margin and
-                self.item_margin < y % self.item_height < self.item_height - self.item_margin
+                0 < click_x < self.item_width * self.num_cols and 0 < click_y < self.item_height * self.num_rows and
+                self.item_margin < click_x % self.item_width < self.item_width - self.item_margin and
+                self.item_margin < click_y % self.item_height < self.item_height - self.item_margin
         ):
-            i = self.num_cols * (y // self.item_height) + x // self.item_width
+            x = click_x // self.item_width
+            y = click_y // self.item_height
+            i = y * self.num_cols + x
             if i < len(items.STARTING_ITEMS):
+                self.render()
+                self.surface.blit(self.highlight_surface, (x * self.item_width, y * self.item_height))
+
                 return items.STARTING_ITEMS[i]
+
         return None

@@ -1,4 +1,6 @@
 
+import copy
+
 from constants import *
 import layout
 import pieces
@@ -13,8 +15,8 @@ STARTING_DECK = [
     ),
     layout.Card(
         pieces.Piece({
-            (0, 0): pieces.Block(inputs=[L], outputs=[R, U]),
-            (0, 1): pieces.Block(inputs=[], outputs=[R, L, D]),
+            (0, 0): pieces.Block(inputs=[L], outputs=[U]),
+            (0, 1): pieces.Block(inputs=[], outputs=[D]),
         }),
         draw_cards=1
     ),
@@ -26,11 +28,11 @@ STARTING_DECK = [
     ),
     layout.Card(
         pieces.Piece({
-             (0, 0): pieces.Block(inputs=[R, U, L, D], outputs=[]),
+             (0, 0): pieces.Block(inputs=[L, U], outputs=[R, D]),
         }),
         draw_cards=2
     )
-] * 4
+] * 2
 
 
 class Players:
@@ -41,10 +43,10 @@ class Players:
     def __init__(self, num_players):
         self.num_players = num_players
         for i in range(num_players):
-            self.decks.append(STARTING_DECK.copy())
+            self.decks.append(copy.deepcopy(STARTING_DECK))
 
     def next_turn(self):
         self.curr_player = (self.curr_player + 1) % self.num_players
 
-    def copy_current_deck(self):
-        return self.decks[self.curr_player].copy()
+    def get_curr_deck(self):
+        return self.decks[self.curr_player]
