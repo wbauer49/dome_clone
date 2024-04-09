@@ -16,6 +16,7 @@ class COLORS:
     CARD_TEXT = (150, 150, 150)
     BLUE_COST = (100, 100, 200)
     GREEN_COST = (100, 200, 100)
+    BUYS = (200, 100, 100)
 
 
 R = 0

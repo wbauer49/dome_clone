@@ -30,6 +30,20 @@ class Bonus:
 
         return surface
 
+    def add_money(self):
+        if self.currency == "b":
+            if self.operation == "+":
+                env.money_counter.b_money += self.value
+            else:
+                env.money_counter.b_money *= self.value
+        else:
+            if self.operation == "+":
+                env.money_counter.g_money += self.value
+            else:
+                env.money_counter.g_money *= self.value
+
+        env.money_counter.render()
+
 
 class Grid:
 
@@ -118,6 +132,10 @@ class Grid:
             for (b_x, b_y), block in drag_piece.blocks.items():
                 self.matrix[x + b_x][y + b_y] = copy.deepcopy(block)
 
+                bonus = self.bonuses.get((x + b_x, y + b_y), None)
+                if bonus:
+                    bonus.add_money()  # TODO: make multiplication bonuses happen before addition
+
             self.surface.blit(drag_piece.surface, ((x + drag_piece.min_x) * PIX, (y + drag_piece.min_y) * PIX))
             return True
 
@@ -141,10 +159,12 @@ class Card:
 class Hand:
 
     card_width = 220
-    card_height = 340
+    card_height = 330
     card_margin = 15
     text_margin = 20
-    location = (WIDTH - card_width * 4, 0)
+    num_cols = 4
+    num_rows = 2
+    location = (WIDTH - card_width * num_cols, 0)
 
     hand_size = 4
 
@@ -157,10 +177,10 @@ class Hand:
         self.start_turn()
 
     def render(self):
-        self.surface = pygame.surface.Surface((self.card_width * 4, self.card_height * 2))
+        self.surface = pygame.surface.Surface((self.card_width * self.num_cols, self.card_height * self.num_rows))
         for i, card in enumerate(self.cards):
-            x = self.card_width * (i % 4) + self.card_margin
-            y = self.card_height * (i // 4) + self.card_margin
+            x = self.card_width * (i % self.num_cols) + self.card_margin
+            y = self.card_height * (i // self.num_cols) + self.card_margin
             pygame.draw.rect(self.surface, COLORS.CARD,
                              (x, y, self.card_width - 2 * self.card_margin, self.card_height - 2 * self.card_margin))
 
@@ -232,7 +252,6 @@ class Store:
 
     def render(self):
         self.surface = pygame.surface.Surface((self.item_width * self.num_cols, self.item_height * self.num_rows))
-
         font = pygame.font.SysFont(pygame.font.get_default_font(), 30)
 
         for i, item in enumerate(items.STARTING_ITEMS):
@@ -265,3 +284,39 @@ class Store:
                 return items.STARTING_ITEMS[i]
 
         return None
+
+
+class MoneyCounter:
+
+    width = 280
+    height = 50
+    text_margin = 10
+    cost_width = 65
+    location = (Hand.location[0], Hand.card_height * Hand.num_rows)
+    surface = None
+
+    b_money = 0
+    g_money = 0
+    buys = 2
+
+    def __init__(self):
+        self.render()
+
+    def render(self):
+        self.surface = pygame.surface.Surface((self.width, self.height))
+        font = pygame.font.SysFont(pygame.font.get_default_font(), 45)
+
+        self.surface.blit(font.render(str(self.b_money), False, COLORS.BLUE_COST), (self.text_margin, self.text_margin))
+        self.surface.blit(font.render(str(self.g_money), False, COLORS.GREEN_COST), (self.text_margin + self.cost_width, self.text_margin))
+        self.surface.blit(font.render(f"{self.buys} Buys", False, COLORS.BUYS), (self.text_margin + self.cost_width * 2, self.text_margin))
+
+    def reset_money(self):
+        self.b_money = 0
+        self.g_money = 0
+        self.buys = 2
+        self.render()
+
+    def pay_for_item(self, item):
+        self.b_money -= item.b_cost
+        self.g_money -= item.g_cost
+        self.render()

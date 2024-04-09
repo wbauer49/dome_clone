@@ -2,7 +2,7 @@
 import pygame
 import time
 
-import constants
+from constants import *
 import controller
 import layout
 import rendering
@@ -17,6 +17,7 @@ try:
     env.grid = layout.Grid()
     env.hand = layout.Hand()
     env.store = layout.Store()
+    env.money_counter = layout.MoneyCounter()
 
     running = True
     while running:
@@ -26,11 +27,16 @@ try:
             if event.type == pygame.QUIT:
                 running = False
                 continue
+            elif event.type == pygame.VIDEORESIZE:
+                WIDTH = event.w
+                HEIGHT = event.h
+                env.renderer = rendering.Renderer()
+                continue
             env.controller.check_event(event)
 
         env.renderer.render()
 
-        sleep_time = (time.time() - start_time) / constants.FRAME_RATE
+        sleep_time = (time.time() - start_time) / FRAME_RATE
         if sleep_time > 0:
             time.sleep(sleep_time)
         else:
