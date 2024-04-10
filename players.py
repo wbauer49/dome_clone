@@ -2,6 +2,7 @@
 import copy
 
 from constants import *
+import env
 import layout
 import pieces
 
@@ -47,6 +48,10 @@ class Players:
 
     def next_turn(self):
         self.curr_player = (self.curr_player + 1) % self.num_players
+
+        env.grid.reset_grid()
+        env.hand.start_turn()
+        env.counter.reset_money()
 
     def get_curr_deck(self):
         return self.decks[self.curr_player]

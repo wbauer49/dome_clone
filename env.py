@@ -5,4 +5,4 @@ renderer = None
 grid = None
 hand = None
 store = None
-money_counter = None
+counter = None

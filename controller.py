@@ -23,9 +23,7 @@ class Controller:
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r:
-                env.grid.reset_grid()
-                env.hand.start_turn(env.players[0])
-                env.store.reset_money()
+                env.players.next_turn()
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # left click
@@ -48,7 +46,7 @@ class Controller:
                             self.activated_item.unique_function(clicked_card)
                             env.hand.render()
                             env.store.render()
-                            env.money_counter.pay_for_item(self.activated_item)
+                            env.counter.pay_for_item(self.activated_item)
                             self.activated_item = None
 
                         else:
@@ -56,7 +54,11 @@ class Controller:
                             self.set_drag_pos(event)
 
                     clicked_item = env.store.get_clicked_item(event)
-                    if clicked_item:
+                    if clicked_item == self.activated_item:
+                        self.activated_item = None
+                        env.store.render()
+                    elif clicked_item and env.counter.can_afford_item(clicked_item):
+                        env.store.highlight_item(clicked_item)
                         self.activated_item = clicked_item
 
             elif event.button == 3:  # right click

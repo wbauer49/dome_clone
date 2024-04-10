@@ -17,7 +17,7 @@ try:
     env.grid = layout.Grid()
     env.hand = layout.Hand()
     env.store = layout.Store()
-    env.money_counter = layout.MoneyCounter()
+    env.counter = layout.Counter()
 
     running = True
     while running:

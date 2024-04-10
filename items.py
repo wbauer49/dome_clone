@@ -13,7 +13,6 @@ class Item:
 
 
 class DuplicateCard(Item):
-
     text = "Duplicate a card in hand"
     b_cost = 4
 
@@ -22,7 +21,6 @@ class DuplicateCard(Item):
 
 
 class TrashCard(Item):
-
     text = "Trash a card in hand"
     b_cost = 3
 
@@ -32,7 +30,6 @@ class TrashCard(Item):
 
 
 class IncreaseDrawsCard(Item):
-
     text = "Add +1 Draw to a card in hand"
     b_cost = 2
 

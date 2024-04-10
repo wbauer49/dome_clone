@@ -33,16 +33,16 @@ class Bonus:
     def add_money(self):
         if self.currency == "b":
             if self.operation == "+":
-                env.money_counter.b_money += self.value
+                env.counter.b_money += self.value
             else:
-                env.money_counter.b_money *= self.value
+                env.counter.b_money *= self.value
         else:
             if self.operation == "+":
-                env.money_counter.g_money += self.value
+                env.counter.g_money += self.value
             else:
-                env.money_counter.g_money *= self.value
+                env.counter.g_money *= self.value
 
-        env.money_counter.render()
+        env.counter.render()
 
 
 class Grid:
@@ -278,15 +278,20 @@ class Store:
             y = click_y // self.item_height
             i = y * self.num_cols + x
             if i < len(items.STARTING_ITEMS):
-                self.render()
-                self.surface.blit(self.highlight_surface, (x * self.item_width, y * self.item_height))
-
                 return items.STARTING_ITEMS[i]
 
         return None
 
+    def highlight_item(self, item):
+        i = items.STARTING_ITEMS.index(item)
+        x = i % self.num_cols
+        y = i // self.num_cols
 
-class MoneyCounter:
+        self.render()
+        self.surface.blit(self.highlight_surface, (x * self.item_width, y * self.item_height))
+
+
+class Counter:
 
     width = 280
     height = 50
@@ -295,11 +300,12 @@ class MoneyCounter:
     location = (Hand.location[0], Hand.card_height * Hand.num_rows)
     surface = None
 
-    b_money = 0
-    g_money = 0
-    buys = 2
+    b_money = None
+    g_money = None
+    buys = None
 
     def __init__(self):
+        self.reset_money()
         self.render()
 
     def render(self):
@@ -316,7 +322,14 @@ class MoneyCounter:
         self.buys = 2
         self.render()
 
+    def can_afford_item(self, item):
+        return self.buys > 0 and self.b_money >= item.b_cost and self.g_money >= item.g_cost
+
     def pay_for_item(self, item):
         self.b_money -= item.b_cost
         self.g_money -= item.g_cost
+        self.buys -= 1
         self.render()
+
+        if self.buys == 0:
+            env.players.next_turn()
